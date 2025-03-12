@@ -1,10 +1,4 @@
-from collections import Counter
-
 import numpy as np
-from scipy.constants import value
-
-from main import predictions
-
 
 class Node:
     """
@@ -16,37 +10,31 @@ class Node:
     split_threshold - граница разделения (значение порога)
     """
     def __init__(self, feature = None, value = None, left = None, right = None, split_threshold = None):
+        print("зашли в инит узла")
         self.feature = feature
         self.value = value
         self.left = left
         self.right = right
         self.split_threshold = split_threshold
+        print("значение узла", self.value)
 
 class DecisionTree:
     """
     min_samples - Минимальное количество семплов
     max_depth - максимальная глубина
-    root - корень
     """
-    def __init__(self, max_depth = 5, min_samples = 2):
+    def __init__(self, max_depth=float('inf'), min_samples = 2):
+
         self.min_samples = min_samples
         self.max_depth = max_depth
-        self.root = None
+        print(f"зашли в init дерева, глубина {max_depth}, в селф {self.max_depth}, сэмплы {min_samples}, в селф {self.min_samples}")
 
     def fit(self, X, y):
-        self.n_classes = len(set(y))
+        print("зашли в fit")
+        self.n_classes = len(set(y))  # Количество классов
         self.n_features = X.shape[1]
         self.root = self.build_tree(X, y)
-
-    # #Считаем неопределенность Джини
-    # def gini_impurity(self, datas):
-    #     gini_impur = np.array([1 - (pow(p, 2) + pow((1-p), 2)) for p in datas])
-    #     print("Gini")
-    #     return gini_impur
-    #
-    # #функция потерь - для Джини
-    # def loss_func(self):
-    #     print("loss_func")
+        print(self.root)
 
     #Считаем энтропию
     def calc_entropy(self, y):
@@ -64,7 +52,7 @@ class DecisionTree:
 
         n = len(parent)
         n_left, n_right = len(left), len(right)
-        gain = parent_entr - (n_left/n) * left_entr - (n_right/n) * right_entr
+        gain = parent_entr - ((n_left/n) * left_entr - (n_right/n) * right_entr)
         print("Прирост", gain)
         return gain
 
@@ -78,24 +66,18 @@ class DecisionTree:
     #Вычисляем значение листа
     def calculate_leaf(self, y):
         #Классификация
-        if self.n_classes == 2:
-            values, counts = np.unique(y, return_counts=True)
-            print("Калькуль", np.unique(y, return_counts=True))
-            return values[np.argmax(counts)]
-        else:
-            #регрессия
-            return np.mean(y)
+        most_common = np.bincount(y).argmax()
+        return most_common
 
     #ищем лучшее разбиение
-    def best_split(self, X, y):
+    def best_split(self, X, y, n_features):
 
-        n_samples, n_features = X.shape
         best_feature = None
-        best_threshold = 0
-        best_gain = float("-inf")
+        best_threshold = None
+        best_gain = -1
 
         for feature in range(n_features):
-            thresholds = np.unique(X[:feature])
+            thresholds = np.unique(X[:,feature])
 
             for threshold in thresholds:
                 left_indice = X[:, feature] < threshold
@@ -111,6 +93,7 @@ class DecisionTree:
         return best_feature, best_threshold
 
     def build_tree(self, X, y, depth = 0):
+        print(f' зашли в билд три')
         n_samples, n_features = X.shape
         n_labels = len(np.unique(y))
 
@@ -118,56 +101,40 @@ class DecisionTree:
             print("Зашло в проверку окончания")
             leaf_value = self.calculate_leaf(y)
             return Node(value = leaf_value)
-        best_feature, best_threshold = self.best_split(X, y)
+
+        #Ищем лучшее разделение
+        best_feature, best_threshold = self.best_split(X, y, n_features)
         print("Бест", best_feature, best_threshold)
+
+        #Если не найдено подходящее разделение
         if best_feature is None:
             print("Зашло в best_feature")
             leaf_value = self.calculate_leaf(y)
             return Node(value=leaf_value)
 
-        left_indexes = np.argwhere(X[:, best_feature] <= best_threshold).flatten()
-        right_indexes = np.argwhere(X[:, best_feature] > best_threshold).flatten()
+        #Разделяем на два поддерева
+        # left_indexes = np.argwhere(X[:, best_feature] <= best_threshold).flatten()
+        # right_indexes = np.argwhere(X[:, best_feature] > best_threshold).flatten()
 
+        left_indexes = X[:, best_feature] < best_threshold
+        right_indexes = X[:, best_feature] >= best_threshold
         left_subtree = self.build_tree(X[left_indexes], y[left_indexes], depth + 1)
         right_subtree = self.build_tree(X[right_indexes], y[right_indexes], depth + 1)
 
         return Node(feature=best_feature, split_threshold=best_threshold, left=left_subtree, right=right_subtree)
 
-    # #Строим дерево в рекурсии
-    # def build_tree(self, X, y, depth = 0):
-    #     n_samples, n_features = X.shape
-    #     unique_classes = np.unique(y)
-    #
-    #     #проверка на лист
-    #     if len(unique_classes) == 1 or (n_samples < self.min_samples) or (self.max_depth is not None and depth >= self.max_depth):
-    #         leaf = self.calculate_leaf(y)
-    #         return Node(value=leaf)
-    #
-    #     """
-    #     ищем наилучшее разбиение
-    #     best_feature - лучший признак
-    #     best_threshold - наилучшее значение для разбиения
-    #     """
-    #     best_feature, best_threshold = self.best_split(X, y, n_features, n_samples)
-    #
-    #     left_indice = X[:, best_feature] < best_threshold
-    #     right_indice = X[:, best_feature] >= best_threshold
-    #     print(left_indice)
-    #     left_subtree = self.build_tree(X[left_indice], y[left_indice], depth+1)
-    #     right_subtree = self.build_tree(X[right_indice], y[right_indice], depth + 1)
-    #
-    #     return Node(feature = best_feature, split_threshold=best_threshold, left=left_subtree, right=right_subtree)
-
-    def predict_input(self, x, tree):
-        if tree.value is not None:
-            return tree.value  # Лист
-
-        if x[tree.feature] < tree.threshold:
-            return self.predict_input(x, tree.left)
-        else:
-            return self.predict_input(x, tree.right)
+    def predict_input(self, x):
+        tree = self.root
+        print(x)
+        while tree.value is None:
+            print("лучшее в предсказании", tree.split_threshold, x[tree.feature])
+            if x[tree.feature] < tree.split_threshold:
+                tree = tree.left
+            else:
+                tree = tree.right
+        return tree.value
 
     #Классифицируем новую инфу по уже построенному дереву
     def predict(self, X):
-        print("classificate")
-        return np.array([self.predict_input(x, self.root) for x in X])
+        print("Классифицируем новые данные")
+        return np.array([self.predict_input(x) for x in X])
