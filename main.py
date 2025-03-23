@@ -1,39 +1,40 @@
 import numpy as np
+from sklearn.model_selection import train_test_split
 
 from desTree import DecisionTree
 
 
 if __name__ == "__main__":
-    #
-    # # X = np.array([[2.771244718, 1.784783929],
-    # #               [1.728571309, 1.169761413],
-    # #               [3.678319846, 2.812664299],
-    # #               [3.961043357, 2.61995032],
-    # #               [2.999208922, 2.209014212],
-    # #               [7.497545867, 3.162953546],
-    # #               [9.00220326, 3.339047188],
-    # #               [7.444242003, 0.476683375],
-    # #               [10.12493903, 3.234550982],
-    # #               [7, 3.2491514],
-    # #               [1.945158, 5.6948415],
-    # #               [6.2522525, 3.3255555519983761],
-    # #               [2.88858585, 1.25252525],
-    # #               [6.642287351, 3.319983761],
-    # #               [9.55555, 1]])
-    # #
-    # # y = np.array([0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2])
-
-    X = np.array([[2.5, 2.4],
-                      [0.5, 0.7],
-                      [3.3, 4.4],
-                      [1.3, 1.1],
-                      [3.0, 3.5]])
-    y = np.array([0, 0, 1, 0, 1])  # Классы
 
 
+    # X = np.array([[2.5, 2.4],
+    #               [0.5, 0.7],
+    #               [3.3, 4.4],
+    #               [1.3, 1.1],
+    #               [3.0, 3.5],
+    #               [6.0, 5.0],
+    #               [5.5, 7.0]])
+    # y = np.array([0, 0, 1, 0, 1, 2, 2])  # Классы
 
-    model = DecisionTree(max_depth = 3)
-    model.fit(X, y)
+    from sklearn.datasets import make_classification
+    from sklearn.model_selection import train_test_split
 
-    predictions = model.predict(np.array([[1.0, 1.0], [2.0, 2.0], [5.0, 5.0]]))
-    print("Предсказанные классы:", predictions)
+    # Генерация данных
+    X, y = make_classification(n_samples=100,  # количество образцов
+                               n_features=5,  # количество признаков
+                               n_informative=3,  # количество информативных признаков
+                               n_redundant=0,  # количество избыточных признаков
+                               n_clusters_per_class=1,
+                               n_classes=3,  # количество классов
+                               random_state=42)
+
+    train_x, test_x, train_y, test_y = train_test_split(X, y)
+    model = DecisionTree(max_depth = 4)
+    model.fit(train_x, train_y)
+
+    predictions = model.predict(test_x)
+    print(test_y)
+    print("Предсказанные классы:\n", predictions)
+    from metrics import accuracy, f1_score
+    print(accuracy(test_y, predictions))
+    print(f1_score(test_y, predictions))
