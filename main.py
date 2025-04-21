@@ -1,52 +1,72 @@
 import numpy as np
+from desTreeKNN import DecisionTreeKNN
 from desTree import DecisionTree
+from sklearn.datasets import make_classification
+from sklearn.model_selection import train_test_split
+import matplotlib.pyplot as plt
+from metrics import accuracy, f1_score, confusion_matrix
+
+
+def plot_classification_results(X, y_true, y_pred, title="Classification Results"):
+
+    plt.figure(figsize=(10, 6))
+
+    # Уникальные классы
+    classes = np.unique(y_true)
+    colors_true = ['blue', 'green', 'red', 'purple', 'orange']  # Цвета для истинных классов
+    colors_pred = ['cyan', 'lime', 'pink', 'violet', 'gold']  # Цвета для предсказанных классов
+
+    # Визуализация истинных классов
+    for i, cls in enumerate(classes):
+        plt.scatter(X[y_true == cls, 0], X[y_true == cls, 1],
+                    color=colors_true[i], label=f'True Class {cls}', alpha=0.5, marker='o')
+
+    # Визуализация предсказанных классов (только ошибочные предсказания)
+    for i, cls in enumerate(classes):
+        mask = (y_pred == cls) & (y_true != cls)  # Только ошибки
+        if np.any(mask):
+            plt.scatter(X[mask, 0], X[mask, 1],
+                        color=colors_pred[i], label=f'Predicted Class {cls} (Error)', alpha=1.0, marker='x')
+
+    plt.xlabel('Feature 1')
+    plt.ylabel('Feature 2')
+    plt.title(title)
+    plt.legend()
+    plt.grid(True)
+    plt.show()
 
 
 if __name__ == "__main__":
-
-
-    # X = np.array([[2.5, 2.4],
-    #               [0.5, 0.7],
-    #               [3.3, 4.4],
-    #               [1.3, 1.1],
-    #               [3.0, 3.5],
-    #               [6.0, 5.0],
-    #               [5.5, 7.0]])
-    # y = np.array([0, 0, 1, 0, 1, 2, 2])  # Классы
-    # tree = DecisionTree(crit="entropy", max_depth=3, min_samples_split=2, knn_neighbor=3)
-    # tree.fit(X, y)
-    # x_test = ([[0.5, 1.0],
-    #               [5.2, 5.6],
-    #               [3.1, 4.0],
-    #               [7, 7]])
-    #
-    # predictions = tree.predict(x_test)
-    #
-    # for i, prediction in enumerate(predictions):
-    #     print(f"Для X_test[{i}] = {x_test[i]}:  Prediction = {prediction}")
-
-
-
-    from sklearn.datasets import make_classification
-    from sklearn.model_selection import train_test_split
-
     # Генерация данных
-    X, y = make_classification(n_samples=100,  # количество образцов
-                               n_features=5,  # количество признаков
-                               n_informative=3,  # количество информативных признаков
-                               n_redundant=0,  # количество избыточных признаков
+    X, y = make_classification(n_samples=500,
+                               n_features=10,
+                               n_informative=3,
+                               n_redundant=0,
                                n_clusters_per_class=1,
-                               n_classes=3)
+                               n_classes=5,
+                               random_state=42)
 
-    train_x, test_x, train_y, test_y = train_test_split(X, y)
-    model = DecisionTree(max_depth = 3, crit='entropy')
+    # Разделение данных
+    train_x, test_x, train_y, test_y = train_test_split(X, y, test_size=0.3, random_state=42)
+
+
+    model = DecisionTreeKNN(max_depth=3, crit='entropy')
     model.fit(train_x, train_y)
-
-    print(test_x)
     predictions = model.predict(test_x)
-    print(test_y)
+
+    model1 = DecisionTree(max_depth=3, crit='entropy')
+    model1.fit(train_x, train_y)
+    predictions1 = model1.predict(test_x)
+    # Вывод результатов
+    print("Истинные классы:\n", test_y)
     print("Предсказанные классы:\n", predictions)
-    from metrics import accuracy, f1_score, confusion_matrix
-    print(accuracy(test_y, predictions))
-    print(f1_score(test_y, predictions, 2))
-    print(confusion_matrix(test_y, predictions, 3))
+    print("Точность KNN (accuracy):", accuracy(test_y, predictions))
+    print("F1-мера для класса 2:", f1_score(test_y, predictions, 2))
+
+    print("Истинные классы:\n", test_y)
+    print("Предсказанные классы:\n", predictions1)
+    print("Точность без KNN (accuracy):", accuracy(test_y, predictions1))
+    print("F1-мера для класса 2:", f1_score(test_y, predictions1, 2))
+
+    plot_classification_results(test_x, test_y, predictions, title="Дерево с KNN")
+    plot_classification_results(test_x, test_y, predictions1, title="Дерево без KNN")
