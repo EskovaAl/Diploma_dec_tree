@@ -126,11 +126,6 @@ class DecisionTreeKNN:
         print('ps', ps)
         entr = -np.sum(ps * np.log2(ps + 1e-9)) #фикс для деления на ноль
         return entr
-    #
-    # def calculate_leaf(self, y):
-    #     #функция расчета значения листа
-    #     most_common = np.bincount(y).argmax()
-    #     return most_common
 
 
     def knn_predict(self, x, X_leaf, y_leaf):

@@ -7,26 +7,26 @@ import matplotlib.pyplot as plt
 from metrics import accuracy, f1_score, confusion_matrix
 
 
-def plot_classification_results(X, y_true, y_pred, title="Classification Results"):
+def plot_classification_results(X, y_true, y_pred, title="Классификация"):
 
     plt.figure(figsize=(10, 6))
 
     # Уникальные классы
     classes = np.unique(y_true)
-    colors_true = ['blue', 'green', 'red', 'purple', 'orange']  # Цвета для истинных классов
-    colors_pred = ['cyan', 'lime', 'pink', 'violet', 'gold']  # Цвета для предсказанных классов
+    colors_true = ['blue', 'green', 'yellow', 'lime', 'navy', 'tan', 'aqua']  # Цвета для истинных классов
+    colors_pred = ['red', 'pink', 'violet', 'firebrick', 'salmon', 'coral']  # Цвета для предсказанных классов
 
     # Визуализация истинных классов
     for i, cls in enumerate(classes):
         plt.scatter(X[y_true == cls, 0], X[y_true == cls, 1],
-                    color=colors_true[i], label=f'True Class {cls}', alpha=0.5, marker='o')
+                    color=colors_true[i], label=f'Истинный класс {cls}', alpha=0.5, marker='o')
 
     # Визуализация предсказанных классов (только ошибочные предсказания)
     for i, cls in enumerate(classes):
         mask = (y_pred == cls) & (y_true != cls)  # Только ошибки
         if np.any(mask):
             plt.scatter(X[mask, 0], X[mask, 1],
-                        color=colors_pred[i], label=f'Predicted Class {cls} (Error)', alpha=1.0, marker='x')
+                        color=colors_pred[i], label=f'Ошибочный класс {cls}', alpha=1.0, marker='x')
 
     plt.xlabel('Feature 1')
     plt.ylabel('Feature 2')
@@ -38,12 +38,12 @@ def plot_classification_results(X, y_true, y_pred, title="Classification Results
 
 if __name__ == "__main__":
     # Генерация данных
-    X, y = make_classification(n_samples=500,
-                               n_features=10,
-                               n_informative=3,
+    X, y = make_classification(n_samples=1000,
+                               n_features=15,
+                               n_informative=8,
                                n_redundant=0,
                                n_clusters_per_class=1,
-                               n_classes=5,
+                               n_classes=6,
                                random_state=42)
 
     # Разделение данных
@@ -61,12 +61,11 @@ if __name__ == "__main__":
     print("Истинные классы:\n", test_y)
     print("Предсказанные классы:\n", predictions)
     print("Точность KNN (accuracy):", accuracy(test_y, predictions))
-    print("F1-мера для класса 2:", f1_score(test_y, predictions, 2))
 
     print("Истинные классы:\n", test_y)
     print("Предсказанные классы:\n", predictions1)
     print("Точность без KNN (accuracy):", accuracy(test_y, predictions1))
-    print("F1-мера для класса 2:", f1_score(test_y, predictions1, 2))
-
-    plot_classification_results(test_x, test_y, predictions, title="Дерево с KNN")
-    plot_classification_results(test_x, test_y, predictions1, title="Дерево без KNN")
+    nabl = int(1000*0.3)
+    featu = 15
+    plot_classification_results(test_x, test_y, predictions, title=f"Дерево с KNN, кол-во тестовых наблюдений = {nabl}, кол-во признаков = {featu}")
+    plot_classification_results(test_x, test_y, predictions1, title=f"Дерево без KNN, кол-во тестовых наблюдений = {nabl}, кол-во признаков = {featu}")
