@@ -4,7 +4,7 @@ from desTree import DecisionTree
 from sklearn.datasets import make_classification
 from sklearn.model_selection import train_test_split
 import matplotlib.pyplot as plt
-from metrics import accuracy, f1_score, confusion_matrix
+from metrics import accuracy, plot_confusion_matrix
 
 
 def plot_classification_results(X, y_true, y_pred, title="Классификация"):
@@ -38,12 +38,12 @@ def plot_classification_results(X, y_true, y_pred, title="Классификац
 
 if __name__ == "__main__":
     # Генерация данных
-    X, y = make_classification(n_samples=1000,
+    X, y = make_classification(n_samples=1500,
                                n_features=15,
                                n_informative=8,
                                n_redundant=0,
                                n_clusters_per_class=1,
-                               n_classes=6,
+                               n_classes=5,
                                random_state=42)
 
     # Разделение данных
@@ -65,7 +65,9 @@ if __name__ == "__main__":
     print("Истинные классы:\n", test_y)
     print("Предсказанные классы:\n", predictions1)
     print("Точность без KNN (accuracy):", accuracy(test_y, predictions1))
-    nabl = int(1000*0.3)
+    nabl = int(1500*0.3)
     featu = 15
     plot_classification_results(test_x, test_y, predictions, title=f"Дерево с KNN, кол-во тестовых наблюдений = {nabl}, кол-во признаков = {featu}")
     plot_classification_results(test_x, test_y, predictions1, title=f"Дерево без KNN, кол-во тестовых наблюдений = {nabl}, кол-во признаков = {featu}")
+    plot_confusion_matrix(test_y,predictions, "Дерево с KNN")
+    plot_confusion_matrix(test_y, predictions1, "Дерево без KNN")

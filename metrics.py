@@ -3,6 +3,8 @@
 '''
 
 import numpy as np
+from matplotlib import pyplot as plt
+import seaborn as sns
 
 
 # Считаем ошибку классификации
@@ -46,3 +48,18 @@ def confusion_matrix(true_y, pred_y, num_classes):
     for i in range(len(pred_y)):
         matrix[true_y[i], pred_y[i]] += 1
     return matrix
+
+def plot_confusion_matrix(true_y, pred_y, title):
+
+    num_classes = len(np.unique(true_y))
+    matrix = confusion_matrix(true_y, pred_y, num_classes)
+
+    plt.figure(figsize=(8, 6))
+    sns.heatmap(matrix, annot=True, fmt='d', cmap="managua",
+                xticklabels=np.arange(num_classes),
+                yticklabels=np.arange(num_classes))
+
+    plt.xlabel('Предсказанные')
+    plt.ylabel('Истинные')
+    plt.title(title)
+    plt.show()
