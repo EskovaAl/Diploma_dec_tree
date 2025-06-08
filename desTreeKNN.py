@@ -6,7 +6,7 @@ from scipy.spatial import distance
 class Node:
     """
     Узел в дереве.
-    feature - Атрибут, на основе которого разделяем(ИНДЕКС)
+    feature - Атрибут, на основе которого разделяется(ИНДЕКС)
     left - левый узел
     right - правый узел
     split_threshold - граница разделения (значение порога)
@@ -56,7 +56,7 @@ class DecisionTreeKNN:
 
         #Ищем наилучшее разделение данных
         best_feature, best_threshold = self.best_split(X, y, n_features)
-        print("Бест", best_feature, best_threshold)
+        # print("Бест", best_feature, best_threshold)
 
         if best_feature is None:  #если нет подходящего разделения
             return Node(is_leaf = True, X_leaf=X, y_leaf=y)
@@ -86,7 +86,7 @@ class DecisionTreeKNN:
                     continue
 
                 gain = self.information_gain(y, y[left_indices], y[right_indices])
-                print(gain)
+                # print(gain)
                 if gain > best_gain:
                     best_gain = gain
                     best_feature = feature

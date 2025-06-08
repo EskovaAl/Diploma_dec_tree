@@ -4,24 +4,24 @@ from desTree import DecisionTree
 from sklearn.datasets import make_classification
 from sklearn.model_selection import train_test_split
 import matplotlib.pyplot as plt
-from metrics import accuracy, plot_confusion_matrix
+from metrics import accuracy, plot_confusion_matrix, f1_score
 
 
 def plot_classification_results(X, y_true, y_pred, title="Классификация"):
 
     plt.figure(figsize=(10, 6))
 
-    # Уникальные классы
+    #Уникальные классы
     classes = np.unique(y_true)
     colors_true = ['blue', 'green', 'yellow', 'lime', 'navy', 'tan', 'aqua']  # Цвета для истинных классов
     colors_pred = ['red', 'pink', 'violet', 'firebrick', 'salmon', 'coral']  # Цвета для предсказанных классов
 
-    # Визуализация истинных классов
+    #Визуализация истинных классов
     for i, cls in enumerate(classes):
         plt.scatter(X[y_true == cls, 0], X[y_true == cls, 1],
                     color=colors_true[i], label=f'Истинный класс {cls}', alpha=0.5, marker='o')
 
-    # Визуализация предсказанных классов (только ошибочные предсказания)
+    #Визуализация предсказанных классов (только ошибочные предсказания)
     for i, cls in enumerate(classes):
         mask = (y_pred == cls) & (y_true != cls)  # Только ошибки
         if np.any(mask):
@@ -38,12 +38,12 @@ def plot_classification_results(X, y_true, y_pred, title="Классификац
 
 if __name__ == "__main__":
     # Генерация данных
-    X, y = make_classification(n_samples=1500,
-                               n_features=15,
-                               n_informative=8,
+    X, y = make_classification(n_samples=150,
+                               n_features=4,
+                               n_informative=2,
                                n_redundant=0,
                                n_clusters_per_class=1,
-                               n_classes=5,
+                               n_classes=3,
                                random_state=42)
 
     # Разделение данных
@@ -61,12 +61,14 @@ if __name__ == "__main__":
     print("Истинные классы:\n", test_y)
     print("Предсказанные классы:\n", predictions)
     print("Точность KNN (accuracy):", accuracy(test_y, predictions))
+    print("Точность KNN (f1):", f1_score(test_y, predictions))
 
     print("Истинные классы:\n", test_y)
     print("Предсказанные классы:\n", predictions1)
     print("Точность без KNN (accuracy):", accuracy(test_y, predictions1))
-    nabl = int(1500*0.3)
-    featu = 15
+    print("Точность KNN (f1):", f1_score(test_y, predictions1))
+    nabl = int(150*0.3)
+    featu = 4
     plot_classification_results(test_x, test_y, predictions, title=f"Дерево с KNN, кол-во тестовых наблюдений = {nabl}, кол-во признаков = {featu}")
     plot_classification_results(test_x, test_y, predictions1, title=f"Дерево без KNN, кол-во тестовых наблюдений = {nabl}, кол-во признаков = {featu}")
     plot_confusion_matrix(test_y,predictions, "Дерево с KNN")

@@ -37,10 +37,16 @@ def precision(true_y, pred_y, class_label):
         return tp / (tp + fp)
 
 
-def f1_score(true_y, pred_y, class_label):
-    prec = precision(true_y, pred_y, class_label)
-    rec = recall(true_y, pred_y, class_label)
-    return (2 * prec * rec)/(prec + rec) if (prec + rec)>0 else 0
+def f1_score(true_y, pred_y, class_label = None):
+    if class_label is not None:
+        prec = precision(true_y, pred_y, class_label)
+        rec = recall(true_y, pred_y, class_label)
+        return (2 * prec * rec)/(prec + rec) if (prec + rec)>0 else 0
+    else:
+        classes = np.unique(true_y)
+        macro_f1_score = [f1_score(true_y, pred_y, class_label) for class_label in classes]
+        return np.mean(macro_f1_score)
+
 
 def confusion_matrix(true_y, pred_y, num_classes):
     #матрица ошибок
